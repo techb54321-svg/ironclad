@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>Ironclad Pricing</title>
+<meta name="description" content="Ironclad is free during the beta. Pro and Coach plans are coming. Join for first access." />
+<meta name="theme-color" content="#07080c" />
+<meta property="og:type" content="website" />
+<meta property="og:site_name" content="Ironclad" />
+<meta property="og:title" content="Ironclad pricing" />
+<meta property="og:description" content="Free during the beta. Pro and Coach plans are coming." />
+<meta property="og:url" content="https://ironclad.coach/pricing/" />
+<meta property="og:image" content="https://ironclad.coach/app/og.png" />
+<meta name="twitter:card" content="summary_large_image" />
+<link rel="icon" href="/app/icon-192.png" type="image/png" />
+<link rel="apple-touch-icon" href="/app/apple-touch-icon.png" />
+<link href="/app/fonts/fonts.css" rel="stylesheet" />
+<style>
+  :root{color-scheme:dark;--bg:#07080c;--line:rgba(255,255,255,.08);--line2:rgba(255,255,255,.14);--text:#f3f5fa;--muted:#8a93a6;--dim:#5c6578;--accent:#ffb020;--accent2:#ff5e1a;--ok:#3ddc97;--bad:#ff4d5e;--display:"Bricolage Grotesque",ui-sans-serif,system-ui,sans-serif;--sans:Inter,ui-sans-serif,system-ui,-apple-system,sans-serif;--ease:cubic-bezier(.2,.8,.2,1)}
+  *{box-sizing:border-box}
+  html,body{margin:0;background:var(--bg);color:var(--text);font-family:var(--sans);-webkit-font-smoothing:antialiased;line-height:1.55;overflow-x:hidden}
+  a{color:inherit}
+  .bg{position:fixed;inset:0;overflow:hidden;z-index:-1;pointer-events:none}
+  .bg i{position:absolute;border-radius:50%;filter:blur(60px)}
+  .bg i:first-child{width:110vmax;height:110vmax;left:-50vmax;top:-75vmax;background:radial-gradient(closest-side,rgba(255,140,40,.3),transparent 70%)}
+  .bg i:last-child{width:80vmax;height:80vmax;right:-40vmax;top:40vh;background:radial-gradient(closest-side,rgba(61,220,151,.14),transparent 70%)}
+  .wrap{max-width:1080px;margin:0 auto;padding:0 20px}
+  nav{display:flex;align-items:center;justify-content:space-between;padding:calc(16px + env(safe-area-inset-top)) 0 10px}
+  .brand{display:flex;align-items:center;gap:10px;font-family:var(--display);font-weight:800;font-size:18px;letter-spacing:.16em;text-transform:uppercase;text-decoration:none}
+  .brand img{width:32px;height:32px;border-radius:9px}.brand em{font-style:normal;color:var(--accent)}
+  .pill{font-weight:700;font-size:14px;padding:9px 16px;border-radius:999px;border:1px solid var(--line2);background:rgba(255,255,255,.04);text-decoration:none}
+  header{text-align:center;padding:44px 0 26px}
+  .eyebrow{font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:var(--accent);font-weight:800;margin:0 0 12px}
+  h1{font-family:var(--display);font-weight:800;font-size:clamp(44px,8vw,84px);line-height:.92;letter-spacing:-.05em;margin:0 0 18px}
+  h1 em{font-style:normal;background:linear-gradient(90deg,var(--accent),var(--accent2));-webkit-background-clip:text;background-clip:text;color:transparent}
+  .lede{font-size:clamp(17px,2.2vw,20px);color:#c3c9d6;max-width:560px;margin:0 auto}
+  .beta{display:inline-flex;align-items:center;gap:8px;margin-top:20px;padding:9px 16px;border-radius:999px;background:rgba(61,220,151,.1);border:1px solid rgba(61,220,151,.35);color:#b5f3d6;font-weight:600;font-size:14px}
+  .beta i{width:8px;height:8px;border-radius:50%;background:var(--ok);box-shadow:0 0 0 4px rgba(61,220,151,.2)}
+  .plans{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;align-items:stretch;margin:34px 0 20px}
+  .plan{position:relative;display:flex;flex-direction:column;background:linear-gradient(180deg,rgba(255,255,255,.055),rgba(255,255,255,.015));border:1px solid var(--line);border-radius:28px;padding:26px 22px 22px;box-shadow:inset 0 1px 0 rgba(255,255,255,.06)}
+  .plan.pro{border-color:rgba(255,176,32,.55);background:linear-gradient(170deg,rgba(255,176,32,.14),rgba(255,94,26,.04) 55%,rgba(255,255,255,.02));box-shadow:0 30px 70px -30px rgba(255,120,30,.6),inset 0 1px 0 rgba(255,255,255,.08)}
+  .tag{position:absolute;top:-13px;left:22px;font-size:11px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;padding:6px 12px;border-radius:999px;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#1d0e00}
+  .plan h2{font-family:var(--display);font-size:26px;letter-spacing:-.02em;margin:0 0 4px}
+  .who{color:var(--muted);font-size:14.5px;margin:0 0 18px;min-height:44px}
+  .price{display:flex;align-items:baseline;gap:6px;margin-bottom:2px}
+  .price b{font-family:var(--display);font-size:52px;font-weight:800;letter-spacing:-.04em;line-height:1}
+  .price span{color:var(--muted);font-weight:600}
+  .alt{color:var(--dim);font-size:13.5px;margin:4px 0 20px;min-height:20px}
+  ul{list-style:none;padding:0;margin:0 0 22px;display:flex;flex-direction:column;gap:11px;flex:1}
+  li{display:flex;gap:10px;font-size:15px;line-height:1.4;color:#d5dae4}
+  li svg{flex:none;width:18px;height:18px;margin-top:2px;stroke:var(--ok);fill:none;stroke-width:2.6;stroke-linecap:round;stroke-linejoin:round}
+  .plan.pro li svg{stroke:var(--accent)}
+  li.plus{font-weight:700;color:var(--text)}
+  .cta{display:block;width:100%;text-align:center;text-decoration:none;font:inherit;font-family:var(--display);font-weight:800;font-size:18px;padding:16px;border-radius:18px;cursor:pointer;border:1px solid var(--line2);background:rgba(255,255,255,.05);color:var(--text);transition:transform .15s var(--ease)}
+  .cta:active{transform:scale(.97)}
+  .cta.primary{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#1d0e00;border:0;box-shadow:0 16px 40px -14px rgba(255,110,30,.9),inset 0 1px 0 rgba(255,255,255,.35)}
+  .note{text-align:center;color:var(--muted);font-size:14px;margin:6px 0 0}
+  section{padding:46px 0}
+  h3.sec{font-family:var(--display);font-size:clamp(30px,5vw,44px);letter-spacing:-.035em;margin:0 0 20px;text-align:center}
+  .faq{max-width:720px;margin:0 auto;display:flex;flex-direction:column;gap:10px}
+  details{border:1px solid var(--line);border-radius:18px;background:rgba(255,255,255,.03)}
+  summary{cursor:pointer;list-style:none;padding:18px 20px;font-weight:700;font-size:16px;display:flex;justify-content:space-between;gap:12px}
+  summary::-webkit-details-marker{display:none}
+  summary::after{content:"+";color:var(--accent);font-size:20px;line-height:1}
+  details[open] summary::after{content:"–"}
+  details p{margin:0;padding:0 20px 18px;color:#c3c9d6}
+  footer{color:var(--dim);font-size:13.5px;text-align:center;padding:30px 0 calc(40px + env(safe-area-inset-bottom));border-top:1px solid var(--line)}
+  footer a{color:var(--muted)}
+  /* sheet */
+  .modal{position:fixed;inset:0;background:rgba(3,4,8,.65);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);display:none;align-items:flex-end;justify-content:center;z-index:30;padding:10px}
+  .modal.show{display:flex}
+  .sheet{position:relative;width:100%;max-width:480px;background:linear-gradient(180deg,#1a1e29,#12151d);border:1px solid var(--line2);border-radius:28px;padding:28px 22px calc(20px + env(safe-area-inset-bottom));animation:up .45s var(--ease);box-shadow:0 -20px 60px -20px rgba(0,0,0,.9)}
+  @media (min-width:700px){.modal{align-items:center}}
+  @keyframes up{from{transform:translateY(40px);opacity:0}}
+  .sheet h4{font-family:var(--display);font-size:28px;letter-spacing:-.02em;margin:0 0 6px}
+  .sheet p{color:#c3c9d6;margin:0 0 14px}
+  .sheet label{display:block;font-size:13px;color:var(--muted);font-weight:600;margin:12px 0 6px}
+  .sheet input,.sheet textarea{width:100%;font:inherit;font-size:16px;padding:14px 15px;border-radius:14px;border:1px solid var(--line);background:rgba(255,255,255,.04);color:var(--text)}
+  .sheet textarea{min-height:80px;resize:vertical}
+  .sheet input:focus,.sheet textarea:focus{outline:none;border-color:rgba(255,176,32,.7);box-shadow:0 0 0 4px rgba(255,176,32,.14)}
+  .sheet .cta{margin-top:16px}
+  .sheet .fine{font-size:12.5px;color:var(--dim);margin:12px 0 0}
+  .sheet .fine a{color:var(--muted)}
+  .x{position:absolute;top:14px;right:14px;width:36px;height:36px;border-radius:50%;border:1px solid var(--line);background:rgba(255,255,255,.04);color:var(--muted);font-size:20px;cursor:pointer}
+  .err{color:#ff9aa4;font-size:14px;margin:10px 0 0;min-height:1em}
+  .done{text-align:center}
+  .done .big{font-size:54px;line-height:1;margin:6px 0 10px}
+  @media (max-width:860px){ .plans{grid-template-columns:1fr;gap:22px} .plan.pro{order:-1} .who{min-height:0} }
+  @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<div class="bg" aria-hidden="true"><i></i><i></i></div>
+<div class="wrap">
+  <nav>
+    <a class="brand" href="/"><img src="/app/icon-192.png" alt=""><span>Iron<em>clad</em></span></a>
+    <a class="pill" href="/app/">Open the app</a>
+  </nav>
+
+  <header>
+    <p class="eyebrow">Pricing</p>
+    <h1>Cheap plans.<br><em>Expensive excuses.</em></h1>
+    <p class="lede">Missing the gym will cost you more than Ironclad ever will.</p>
+    <div class="beta"><i></i>Everything is free while Ironclad is in beta</div>
+  </header>
+
+  <div class="plans">
+    <div class="plan">
+      <h2>Free</h2>
+      <p class="who">Everything you need to hold yourself to it.</p>
+      <div class="price"><b>$0</b><span>forever</span></div>
+      <p class="alt"></p>
+      <ul>
+        <li><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>GPS-verified check-ins at your gym</li>
+        <li><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>Weekly verdicts, streaks and freezes</li>
+        <li><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>Deposit and forfeit tracking</li>
+        <li><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>Reports you send to your referee</li>
+        <li><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>A log that shows tampering</li>
+        <li><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>No account. Your data stays on your phone.</li>
+      </ul>
+      <a class="cta" href="/app/">Start free</a>
+    </div>
+
+    <div class="plan pro">
+      <span class="tag">Recommended</span>
+      <h2>Pro</h2>
+      <p class="who">Your referee sees it happen. No way to go quiet.</p>
+      <div class="price"><b>$5</b><span>/ month</span></div>
+      <p class="alt">or $48 a year, two months free</p>
+      <ul>
+        <li class="plus"><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>Everything in Free, plus:</li>
+        <li><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>Your referee gets every check-in, live, with your photo</li>
+        <li><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>Weekly verdict sent on schedule, even if you never open the app</li>
+        <li><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>Your referee's live view of your week</li>
+        <li><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>More than one goal, like gym and running</li>
+        <li><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>Priority help if anything goes wrong</li>
+      </ul>
+      <button class="cta primary" data-plan="pro">Join Pro</button>
+    </div>
+
+    <div class="plan">
+      <h2>Coach</h2>
+      <p class="who">For personal trainers who are tired of no-shows.</p>
+      <div class="price"><b>$19</b><span>/ month</span></div>
+      <p class="alt">up to 15 clients</p>
+      <ul>
+        <li><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>Be the referee for all your clients</li>
+        <li><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>One dashboard: who showed up this week</li>
+        <li><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>A heads-up before a client misses a week</li>
+        <li><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>Weekly report for every client</li>
+        <li><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>Your clients get Pro included</li>
+      </ul>
+      <button class="cta" data-plan="coach">Join the Coach waitlist</button>
+    </div>
+  </div>
+  <p class="note">Prices in US dollars. Ironclad never holds your stake money: your referee does.</p>
+
+  <section>
+    <h3 class="sec">Questions</h3>
+    <div class="faq">
+      <details><summary>Is Ironclad free right now?</summary><p>Yes. Everything, including Ironclad alerts, is free while Ironclad is in beta. Free stays free after that.</p></details>
+      <details><summary>What happens when Pro opens?</summary><p>If you joined, you'll get one email saying it's open. Nothing changes for anyone without plenty of notice first.</p></details>
+      <details><summary>Does Ironclad hold my deposit?</summary><p>No. Your referee holds your deposit and sends forfeits where you agreed. Ironclad never touches your stake money; Pro would only be the subscription.</p></details>
+      <details><summary>Can I cancel?</summary><p>Yes, any time, once paid plans exist. You'd drop back to Free and keep your whole history.</p></details>
+      <details><summary>I'm a personal trainer. How would Coach work?</summary><p>Your clients sign their contracts with you as the referee. You see everyone's week on one screen and get a heads-up before someone is about to miss. Join the waitlist and tell us what you'd need.</p></details>
+    </div>
+  </section>
+</div>
+<footer>Ironclad · <a href="/">Home</a> · <a href="/app/privacy.html">Your data, plainly</a></footer>
+
+<div class="modal" id="modal" role="dialog" aria-modal="true" aria-labelledby="m-title">
+  <div class="sheet" id="sheet">
+    <button class="x" id="close" aria-label="Close">×</button>
+    <form id="form" novalidate>
+      <h4 id="m-title">You're early.</h4>
+      <p id="m-text">Pro isn't open yet. Leave your email and you'll be first in when it is.</p>
+      <label for="email">Email</label>
+      <input type="email" id="email" autocomplete="email" inputmode="email" placeholder="you@example.com" required />
+      <label for="note" id="note-label">What would make Pro worth $5 a month to you? (optional)</label>
+      <textarea id="note" maxlength="300" placeholder="Be honest. It shapes what we build."></textarea>
+      <button class="cta primary" type="submit" id="go">Get early access</button>
+      <p class="err" id="err"></p>
+      <p class="fine">One email when it opens. No spam, never shared. <a href="/app/privacy.html">Your data</a></p>
+    </form>
+    <div class="done" id="done" hidden>
+      <div class="big">🎉</div>
+      <h4>You're on the list.</h4>
+      <p id="done-text">We'll email you once when it opens. Meanwhile, everything is free.</p>
+      <a class="cta primary" href="/app/">Open Ironclad</a>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  const SERVER = String(window.IRONCLAD_ALERTS_SERVER || 'https://ironclad.techb54321.workers.dev').replace(/\/+$/, '');
+  const from = (new URLSearchParams(location.search).get('from') || (document.referrer.includes('/app') ? 'app' : document.referrer.includes(location.host) ? 'landing' : 'direct')).replace(/[^a-z]/gi, '').slice(0, 12);
+  const $ = id => document.getElementById(id);
+  const today = new Date().toISOString().slice(0, 10);
+  const once = key => { try { const k = 'ironclad.pt.' + key; if (localStorage.getItem(k) === today) return false; localStorage.setItem(k, today); } catch {} return true; };
+  // text/plain keeps this a simple request; failures never get in the visitor's way
+  const send = (event, extra) => fetch(SERVER + '/interest', { method:'POST', headers:{ 'Content-Type':'text/plain' }, body: JSON.stringify({ event, from, ...extra }), keepalive:true });
+  if (once('view')) send('view').catch(() => {});
+
+  let plan = 'pro';
+  const copy = {
+    pro: { title:"You're early.", text:"Pro isn't open yet. Leave your email and you'll be first in when it is.", note:'What would make Pro worth $5 a month to you? (optional)', done:"We'll email you once when Pro opens. Meanwhile, everything is free." },
+    coach: { title:'Coaches first.', text:"Coach isn't open yet. Leave your email and we'll bring you in early, and ask what you'd need.", note:'How many clients do you train, and what would you want it to do? (optional)', done:"We'll be in touch before Coach opens. Meanwhile, try Ironclad yourself." },
+  };
+  const open = p => {
+    plan = p; const c = copy[p];
+    $('m-title').textContent = c.title; $('m-text').textContent = c.text; $('note-label').textContent = c.note; $('done-text').textContent = c.done;
+    $('form').hidden = false; $('done').hidden = true; $('err').textContent = ''; $('note').value = '';
+    $('modal').classList.add('show'); setTimeout(() => $('email').focus(), 60);
+    if (once('tap:' + p)) send('tap:' + p).catch(() => {});
+  };
+  const close = () => $('modal').classList.remove('show');
+  document.querySelectorAll('[data-plan]').forEach(b => b.onclick = () => open(b.dataset.plan));
+  $('close').onclick = close;
+  $('email').addEventListener('input', () => { $('err').textContent = ''; });
+  $('modal').onclick = e => { if (e.target === $('modal')) close(); };
+  addEventListener('keydown', e => { if (e.key === 'Escape') close(); });
+  $('form').onsubmit = async e => {
+    e.preventDefault();
+    const email = $('email').value.trim();
+    if (!/^[^\s@]+@[^\s@]+\.[a-z]{2,}$/i.test(email)) { $('err').textContent = "That email doesn't look right."; return; }
+    $('go').disabled = true; $('go').textContent = 'Saving…'; $('err').textContent = '';
+    try {
+      const r = await send('join:' + plan, { email, note: $('note').value });
+      if (!r.ok) { const j = await r.json().catch(() => ({})); throw new Error(j.error || "Couldn't save that. Try again in a moment."); }
+      $('form').hidden = true; $('done').hidden = false;
+    } catch (err) { $('err').textContent = err.message && !/fetch/i.test(err.message) ? err.message : "Couldn't save that. Check your connection and try again."; }
+    finally { $('go').disabled = false; $('go').textContent = 'Get early access'; }
+  };
+})();
+</script>
+</body>
+</html>
