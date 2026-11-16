@@ -1213,7 +1213,11 @@ function readChannel(){
 async function registerAlerts(){
   let r;
   try { r = await fetch(ALERTS_SERVER + '/register', { method:'POST', headers:{'Content-Type':'application/json'}, body:'{}' }); }
-  catch(e){ throw new Error("Couldn't reach the alerts server. Check your connection, or pick Manual for now."); }
+  catch(e){
+    // Tell "server down" apart from "server up but running old code that blocks this address".
+    const up = await fetch(ALERTS_SERVER + '/health', { mode:'no-cors', cache:'no-store' }).then(() => true, () => false);
+    throw new Error(up ? "The alerts server is running but needs its latest code. Update it from the setup guide, or pick Manual for now." : "Couldn't reach the alerts server. Check your connection, or pick Manual for now.");
+  }
   const j = await r.json().catch(()=>({})); if (!r.ok || !j.account) throw new Error(j.error || 'The alerts server said no. Try again, or pick Manual for now.');
   return { type:'ironclad', url: ALERTS_SERVER, account: j.account, secret: j.secret };
 }
@@ -1252,7 +1256,10 @@ $('s-test').onclick = async () => {
   msg.textContent = 'Checking…';
   if (ch.type==='ironclad' && ch.pending) {
     try { const r = await fetch(ALERTS_SERVER + '/health'); if (!r.ok) throw 0; msg.textContent = '✅ The alerts server is up. Your private space is created when you save.'; }
-    catch { msg.textContent = "❌ Couldn't reach the alerts server. Check your connection, or pick Manual for now."; }
+    catch {
+      const up = await fetch(ALERTS_SERVER + '/health', { mode:'no-cors', cache:'no-store' }).then(() => true, () => false);
+      msg.textContent = up ? '❌ The alerts server is running but needs its latest code. Update it from the setup guide, or pick Manual for now.' : "❌ Couldn't reach the alerts server. Check your connection, or pick Manual for now.";
+    }
     return;
   }
   try {
