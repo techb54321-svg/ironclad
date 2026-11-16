@@ -127,7 +127,7 @@
   .chips{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
   .chips button{padding:9px 14px;border-radius:999px;font-size:14px}
   .chips button.on{border-color:rgba(255,176,32,.7);color:#ffd28a;background:rgba(255,176,32,.12)}
-  .money{position:relative}.money::before{content:"$";position:absolute;left:15px;top:50%;transform:translateY(-50%);color:var(--muted);font-weight:700;pointer-events:none}.money input{padding-left:30px}
+  .money{position:relative}.money::before{content:attr(data-sym);position:absolute;left:15px;top:50%;transform:translateY(-50%);color:var(--muted);font-weight:700;pointer-events:none}.money input{padding-left:30px}
   details.fine{margin-top:14px;border:1px solid var(--line);border-radius:16px;background:rgba(255,255,255,.02)}
   details.fine summary{cursor:pointer;padding:14px;font-size:14px;font-weight:600;color:var(--muted);list-style:none;display:flex;justify-content:space-between}
   details.fine summary::-webkit-details-marker{display:none}
@@ -470,11 +470,14 @@
 
       <div class="wiz" data-step="stakes">
         <div class="wiz-head"><p class="eyebrow">Step 3 · The stakes</p><h3>Put your money where your squat is.</h3><p>Big enough to sting, small enough that you won't quit the whole thing.</p></div>
-        <label for="s-pledge">Price of a failed week</label>
-        <div class="money"><input type="number" id="s-pledge" value="50" min="0" step="5" inputmode="numeric" /></div>
+        <div class="row" style="align-items:flex-end">
+          <div style="flex:2"><label for="s-pledge">Price of a failed week</label>
+          <div class="money" data-sym="$"><input type="number" id="s-pledge" value="50" min="0" step="5" inputmode="numeric" /></div></div>
+          <div style="flex:1;min-width:110px"><label for="s-currency">Currency</label><select id="s-currency"></select></div>
+        </div>
         <div class="chips" id="pledge-chips"><button type="button" data-v="10">$10</button><button type="button" data-v="25">$25</button><button type="button" data-v="50">$50</button><button type="button" data-v="100">$100</button></div>
         <label for="s-deposit">Deposit you hand <span id="s-dep-ref">your referee</span> up front</label>
-        <div class="money"><input type="number" id="s-deposit" value="200" min="0" step="10" inputmode="numeric" /></div>
+        <div class="money" data-sym="$"><input type="number" id="s-deposit" value="200" min="0" step="10" inputmode="numeric" /></div>
         <p class="small muted" style="margin-top:8px">Failed weeks come out of this, so nobody has to chase you. What's left comes back to you. Four weeks of cover is a good start.</p>
         <label for="s-conseq">Where forfeits go (pick something that stings)</label>
         <textarea id="s-conseq" placeholder="e.g. a political party I can't stand. My referee sends it and I get the receipt."></textarea>
@@ -676,7 +679,24 @@ function ymd(d){ return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDa
 function parseYmd(s){ const [y,m,d]=s.split('-').map(Number); return new Date(y,m-1,d); }
 function fmtDate(d){ return d.toLocaleDateString(undefined,{weekday:'short',month:'short',day:'numeric'}); }
 function fmtTime(ts){ return new Date(ts).toLocaleTimeString(undefined,{hour:'numeric',minute:'2-digit'}); }
-function money(n){ return (n||0).toLocaleString(undefined,{style:'currency',currency:'USD',maximumFractionDigits:0}); }
+const CURRENCIES = ['AUD','USD','NZD','GBP','EUR','CAD','SGD','INR','ZAR','JPY'];
+function guessCurrency(){
+  try {
+    const tz = Intl.DateTimeFormat().resolvedOptions().timeZone || '';
+    if (tz.startsWith('Australia/')) return 'AUD';
+    if (tz === 'Pacific/Auckland' || tz === 'Pacific/Chatham') return 'NZD';
+    if (tz === 'Europe/London') return 'GBP';
+    const region = new Intl.Locale(navigator.language || 'en-US').maximize().region;
+    const map = { AU:'AUD', US:'USD', NZ:'NZD', GB:'GBP', IE:'EUR', DE:'EUR', FR:'EUR', ES:'EUR', IT:'EUR', NL:'EUR', BE:'EUR', AT:'EUR', PT:'EUR', FI:'EUR', GR:'EUR', CA:'CAD', SG:'SGD', IN:'INR', ZA:'ZAR', JP:'JPY' };
+    return map[region] || 'USD';
+  } catch { return 'USD'; }
+}
+function currentCurrency(){ if (cfg) return cfg.currency || guessCurrency(); const sel = document.getElementById('s-currency'); return (sel && sel.value) || guessCurrency(); }
+function money(n, cur){
+  try { return new Intl.NumberFormat(undefined, { style:'currency', currency: cur || currentCurrency(), currencyDisplay:'narrowSymbol', maximumFractionDigits:0 }).format(n||0); }
+  catch { return '$' + Math.round(n||0); }
+}
+function currencySymbol(cur){ try { return new Intl.NumberFormat(undefined, { style:'currency', currency:cur, currencyDisplay:'narrowSymbol' }).formatToParts(0).find(p => p.type==='currency').value; } catch { return '$'; } }
 function esc(s){ return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 
 /* ---------- feel: haptics, hold-to-confirm, confetti ---------- */
@@ -1009,7 +1029,7 @@ function renderSettings(){
   $('cfg-view').innerHTML = [
     ['Name', c.name], ['Gym', `${c.gym.label||''} (${c.gym.lat.toFixed(5)}, ${c.gym.lng.toFixed(5)})`], ['Radius', c.radius+' m'], ['Minimum stay', c.minMinutes+' min'],
     ['Target', `${c.target}× per week, weeks start ${DN[c.weekStart]}`], ['Planned days', c.planDays.map(d=>DN[d]).join(', ')||'none'], ['Nag time', fmtRemind(c.remindTime)],
-    ['Photo required', c.requirePhoto?'yes':'no'], ['Referee', `${c.referee.name} ${c.referee.phone||''} ${c.referee.email||''}`], ['Pledge', money(c.pledge)+' per failed week'],
+    ['Photo required', c.requirePhoto?'yes':'no'], ['Referee', `${c.referee.name} ${c.referee.phone||''} ${c.referee.email||''}`], ['Pledge', money(c.pledge)+' per failed week'], ['Currency', currentCurrency()],
     ['Deposit', hasDeposit() ? `${money(deposited())} handed over, ${money(depositLeft())} left` : 'none'], ['Forfeits go to', c.consequence||'—'], ['Freezes', c.freezesPerQuarter+' per quarter'], ['Referee updates', CH_NAMES[(c.channel||{}).type||'none']], ['Referee agreed', refereeAgreement() ? new Date(refereeAgreement().agreedAt).toLocaleDateString() : 'not yet'], ['Signed', new Date(c.createdAt).toLocaleString()], ['Counting from', fmtDate(parseYmd(startWeekKey()))]
   ].map(([k,v])=>`<div class="kv"><span class="muted">${k}</span><b>${esc(v)}</b></div>`).join('');
   $('btn-notify').textContent = ('Notification' in window && Notification.permission==='granted') ? 'Notifications on ✓' : 'Enable notifications';
@@ -1044,6 +1064,7 @@ function initSetupForm(prefill){
     $('s-ntfy').value = ch.type==='ntfy' ? ch.topic : '';
     keptChannel = ch.type!=='none' ? ch : null;
   } else { showMap(NaN, NaN); keptChannel = null; document.querySelector('#s-mode input[value="auto"]').checked = true; $('s-ntfy').value=''; }
+  $('s-currency').value = (prefill && c.currency) || guessCurrency(); syncCurrencyUI();
   updateChannelUI(); syncChips();
   wizStep = 0; showWizStep();
 }
@@ -1205,6 +1226,13 @@ document.querySelectorAll('#s-mode input').forEach(i => i.onchange = updateChann
 $('s-weekstart').addEventListener('change', updateChannelUI);
 $('s-refname').addEventListener('input', () => { $('s-dep-ref').textContent = $('s-refname').value.trim() || 'your referee'; });
 $('s-pledge').addEventListener('change', () => { if (!cfg) $('s-deposit').value = Math.max(0, +$('s-pledge').value||0) * 4; });
+$('s-currency').innerHTML = CURRENCIES.map(c => `<option value="${c}">${c} ${currencySymbol(c)}</option>`).join('');
+function syncCurrencyUI(){
+  const sym = currencySymbol($('s-currency').value);
+  document.querySelectorAll('#setup .money').forEach(el => el.dataset.sym = sym);
+  document.querySelectorAll('#pledge-chips button').forEach(b => b.textContent = sym + b.dataset.v);
+}
+$('s-currency').addEventListener('change', syncCurrencyUI);
 function normPhone(p){ const d = String(p||'').replace(/[^\d+]/g,''); return d.startsWith('+') ? '+' + d.slice(1).replace(/\+/g,'') : d; }
 function readChannel(){
   if (!modeAuto()) return { type:'none' };
@@ -1236,7 +1264,7 @@ function channelProblem(ch){
 function snapshot(){
   const st = currentStatus();
   return { name:cfg.name, refereeName:cfg.referee.name, ...(cfg.channel.type==='sms' ? { refereePhone:normPhone(cfg.referee.phone) } : {}), target:cfg.target, pledge:cfg.pledge, consequence:cfg.consequence, gym:cfg.gym.label, minMinutes:cfg.minMinutes,
-    weekStart:cfg.weekStart, tz:Intl.DateTimeFormat().resolvedOptions().timeZone, sendHour: cfg.channel?.sendHour ?? 9, startWeek:startWeekKey(),
+    weekStart:cfg.weekStart, tz:Intl.DateTimeFormat().resolvedOptions().timeZone, sendHour: cfg.channel?.sendHour ?? 9, startWeek:startWeekKey(), currency: currentCurrency(),
     week:st.wk, done:st.done, remaining:st.remaining, days:[...st.days], owed:owed(), streak:streak(), warmup:st.warmup, frozen:st.frozen,
     deposited:deposited(), depositLeft:depositLeft(), appUrl: new URL('./', location.href).href };
 }
@@ -1288,7 +1316,7 @@ function readSetupForm(){
     target: Math.min(7, Math.max(1, +$('s-target').value||3)), weekStart: +$('s-weekstart').value, planDays, remindTime: $('s-remind').value||'17:00',
     requirePhoto: $('s-photo').checked,
     referee: { name:$('s-refname').value.trim(), phone:$('s-refphone').value.trim(), email:$('s-refemail').value.trim() },
-    pledge: Math.max(0, +$('s-pledge').value||0), consequence: $('s-conseq').value.trim(), freezesPerQuarter: Math.max(0, +$('s-freeze').value||0),
+    pledge: Math.max(0, +$('s-pledge').value||0), currency: $('s-currency').value || guessCurrency(), consequence: $('s-conseq').value.trim(), freezesPerQuarter: Math.max(0, +$('s-freeze').value||0),
     channel: readChannel(),
   };
 }
@@ -1308,7 +1336,7 @@ $('setup').onsubmit = ev => { ev.preventDefault(); if (inEdit()) submitSetup(); 
 function describeChanges(a, b){
   const out = [], m = v => money(v), days = d => (d||[]).map(x=>DN[x]).join(', ') || 'none';
   const f = { name:['Name', v=>v], target:['Sessions a week', v=>v], weekStart:['Week starts', v=>DN[v]], planDays:['Planned days', days], remindTime:['Nag time', fmtRemind],
-    requirePhoto:['Check-in photo', v=>v?'on':'off'], pledge:['Price of a failed week', m], consequence:['Forfeits go to', v=>v||'—'], freezesPerQuarter:['Freezes a quarter', v=>v],
+    requirePhoto:['Check-in photo', v=>v?'on':'off'], pledge:['Price of a failed week', m], currency:['Currency', v=>v||'—'], consequence:['Forfeits go to', v=>v||'—'], freezesPerQuarter:['Freezes a quarter', v=>v],
     minMinutes:['Minimum stay', v=>v+' min'], radius:['Check-in radius', v=>v+' m'] };
   for (const [k, [label, fmt]] of Object.entries(f)) if (JSON.stringify(a[k]) !== JSON.stringify(b[k])) out.push(`${label}: ${fmt(a[k])} → ${fmt(b[k])}`);
   if (a.gym && b.gym) {
@@ -1609,7 +1637,7 @@ function escalate(st){
 function refereeAgreement(){ return ledger.find(e => e.type==='referee' && e.agreed); }
 function refereePageUrl(token){
   const base = new URL('referee/', location.href).href;
-  const p = new URLSearchParams({ n:cfg.name, r:cfg.referee.name, t:cfg.target, p:cfg.pledge, c:cfg.consequence||'', d:cfg.weekStart, g:cfg.gym.label||'', dep: depositLeft(), m: cfg.channel.type==='sms' ? 'sms' : channelActive() ? 'push' : 'manual' });
+  const p = new URLSearchParams({ cur: currentCurrency(), n:cfg.name, r:cfg.referee.name, t:cfg.target, p:cfg.pledge, c:cfg.consequence||'', d:cfg.weekStart, g:cfg.gym.label||'', dep: depositLeft(), m: cfg.channel.type==='sms' ? 'sms' : channelActive() ? 'push' : 'manual' });
   if (cfg.channel.type==='sms') { p.set('h', cfg.channel.sendHour ?? 9); p.set('s', cfg.channel.url); if (token) p.set('k', token); }
   if (cfg.channel.type==='ntfy') p.set('tp', cfg.channel.topic);
   return base + '?' + p.toString();
