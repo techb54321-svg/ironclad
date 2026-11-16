@@ -223,7 +223,7 @@
   .banner{display:flex;gap:12px;align-items:flex-start;border-radius:20px;padding:14px 16px;margin-bottom:12px;font-size:14.5px;font-weight:500;line-height:1.45;border:1px solid;backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}
   .banner>.ico{width:22px;height:22px;margin-top:1px}
   .banner>div{flex:1;min-width:0}
-  .banner button{padding:7px 12px;margin:8px 8px 0 0;font-size:13.5px;border-radius:12px;display:inline-block}
+  .banner button{padding:8px 14px!important;margin:10px 0 0!important;font-size:13.5px;font-weight:600;border-radius:12px;display:table}
   .banner.bad{background:rgba(255,77,94,.1);border-color:rgba(255,77,94,.35);color:#ffc2c7}.banner.bad>.ico{color:var(--bad)}
   .banner.warn{background:rgba(255,176,32,.08);border-color:rgba(255,176,32,.28);color:#ffe2ad}.banner.warn>.ico{color:var(--warn)}
   .banner.ok{background:rgba(61,220,151,.1);border-color:rgba(61,220,151,.35);color:#b5f3d6}
@@ -430,7 +430,7 @@
         <label for="s-name">Your name</label>
         <input type="text" id="s-name" required placeholder="What your referee calls you" />
         <label for="s-search">Find your gym</label>
-        <div class="search"><input type="text" id="s-search" placeholder="Name and city, address, or a Maps link" enterkeyhint="search" /><button type="button" id="s-search-btn" aria-label="Search"><svg class="ico"><use href="#i-search"/></svg></button></div>
+        <div class="search"><input type="text" id="s-search" placeholder="Gym name and city, or an address" enterkeyhint="search" /><button type="button" id="s-search-btn" aria-label="Search"><svg class="ico"><use href="#i-search"/></svg></button></div>
         <div id="s-results" class="results"></div>
         <div class="or">or</div>
         <button type="button" id="s-locate" class="btn-block iconbtn" style="justify-content:center"><svg class="ico"><use href="#i-pin"/></svg>I'm standing in it right now</button>
@@ -563,7 +563,7 @@
       <div class="deposit">
         <div class="dep-top"><div><span id="k-deposit-label">Deposit held</span><small id="k-cover"></small></div><b id="k-deposit"></b></div>
         <div class="meter" id="dep-meter"></div>
-        <p class="small muted" style="margin:0"><b id="k-pledge" style="color:var(--text)"></b> per failed week · owed beyond deposit <b id="k-owed"></b></p>
+        <p class="small muted" style="margin:0"><b id="k-pledge" style="color:var(--text)"></b> per failed week<span id="k-owed-wrap"> · <b id="k-owed"></b> owed on top</span></p>
       </div>
       <div class="tiles">
         <div class="tile"><small>Streak</small><b id="k-streak"></b></div>
@@ -920,7 +920,7 @@ function renderToday(){
   if (channelActive() && outbox.length) banners.push(['warn',`📡 ${outbox.length} message${outbox.length===1?'':'s'} to ${esc(cfg.referee.name)} stuck in the outbox${lastDeliveryError?` (${esc(lastDeliveryError)})`:''}. <button style="padding:6px 10px;margin-left:6px" id="btn-retry">Retry</button>`]);
   if (!ag && !tampered) banners.push(['warn',`🤝 ${esc(cfg.referee.name)} hasn't said yes yet. Until they do, this is a diary, not a contract.${cfg.channel.type==='sms' ? ' No weekly texts go out before that.' : ''} <button style="padding:6px 10px;margin-left:6px" id="btn-invite2">Invite</button>`]);
   if (ag && cfg.channel.type==='ironclad' && refSubs===0 && !tampered) banners.push(['warn',`🔕 ${esc(cfg.referee.name)} agreed but hasn't turned on alerts yet, so they won't see anything. Resend the link. <button style="padding:6px 10px;margin-left:6px" id="btn-invite3">Resend</button>`]);
-  if (!channelActive()) banners.push(['warn','📨 Reports are manual, which means you can skip them. Settings → Edit contract → Ironclad alerts fixes that.']);
+  if (!channelActive()) banners.push(['warn',`📨 Reports are manual, so a bad week can quietly go unreported. Turn on alerts and ${esc(cfg.referee.name)} hears it live. <button style="padding:6px 10px;margin-left:6px" id="btn-go-alerts">Turn on</button>`]);
   const BI = { bad:'i-alert', warn:'i-info', ok:'i-check', info:'i-info' };
   $('banners').innerHTML = banners.map(([l,h])=>`<div class="banner ${l}"><svg class="ico"><use href="#${BI[l]}"/></svg><div>${h.replace(/^\p{Extended_Pictographic}\uFE0F?\s*/u,'')}</div></div>`).join('');
   const bp = $('btn-paid'); if (bp) bp.onclick = markPaid;
@@ -929,12 +929,17 @@ function renderToday(){
   const bi = $('btn-invite2'); if (bi) bi.onclick = inviteReferee;
   const bi3 = $('btn-invite3'); if (bi3) bi3.onclick = inviteReferee;
   const bt = $('btn-topup2'); if (bt) bt.onclick = topUpDeposit;
+  const ba = $('btn-go-alerts'); if (ba) ba.onclick = () => {
+    initSetupForm(cfg); show('setup');
+    const auto = document.querySelector('#s-mode input[value="auto"]'); auto.checked = true; auto.dispatchEvent(new Event('change', { bubbles:true }));
+    setTimeout(() => $('s-mode').scrollIntoView({ behavior:'smooth', block:'center' }), 60);
+  };
   checkRefereeAgreement();
   escalate(st);
 
   $('k-ref').textContent = cfg.referee.name;
   $('k-pledge').textContent = money(cfg.pledge);
-  $('k-owed').textContent = money(o); $('k-owed').style.color = o>0?'var(--bad)':'var(--ok)';
+  $('k-owed').textContent = money(o); $('k-owed').style.color = 'var(--bad)'; $('k-owed-wrap').style.display = o>0 ? '' : 'none';
   $('k-deposit-label').textContent = `Deposit with ${cfg.referee.name}`;
   $('k-deposit').textContent = hasDeposit() ? money(dl) : 'none';
   { const wks = cfg.pledge ? Math.floor(dl/cfg.pledge) : 0; $('k-cover').textContent = hasDeposit() && cfg.pledge ? `${wks} week${wks===1?'':'s'} of cover` : 'Top up to put money on the line'; }
@@ -949,7 +954,7 @@ function renderToday(){
   $('btn-agreed').style.display = ag ? 'none' : '';
   $('btn-invite').querySelector('.lbl').textContent = ag ? 'Resend referee info' : 'Invite referee';
   const kc = $('k-channel');
-  if (!channelActive()) { kc.textContent = 'manual (weak)'; kc.style.color='var(--warn)'; }
+  if (!channelActive()) { kc.textContent = 'manual · unwatched'; kc.style.color='var(--warn)'; }
   else if (outbox.length) { kc.textContent = `${CH_NAMES[cfg.channel.type]} · ${outbox.length} queued`; kc.style.color='var(--warn)'; }
   else { kc.textContent = `${CH_NAMES[cfg.channel.type]} · live`; kc.style.color='var(--ok)'; }
 
@@ -985,8 +990,8 @@ function fmtRange(start){
 function renderHistory(){
   const ss = sessions().filter(s=>s.valid), ws = weekEntries();
   const passed = ws.filter(w=>w.result==='pass').length, judged = ws.filter(w=>w.result!=='frozen').length;
-  $('t-sessions').textContent = ss.length;
-  $('t-weeks').textContent = passed;
+  $('t-sessions').textContent = ss.length; $('t-sessions').nextElementSibling.textContent = ss.length===1 ? 'session' : 'sessions';
+  $('t-weeks').textContent = passed; $('t-weeks').nextElementSibling.textContent = passed===1 ? 'week won' : 'weeks won';
   $('t-rate').textContent = judged ? Math.round(passed/judged*100)+'%' : '—';
 
   const byDay = {};
@@ -1014,7 +1019,7 @@ function renderHistory(){
       case 'attempt': body = `🚫 Check-in refused: ${esc(e.reason)}`; break;
       case 'week': body = `${e.result==='pass'?'🏆':e.result==='fail'?'💸':'🧊'} Week of ${e.week} ${e.result.toUpperCase()} (${e.done}/${e.target})${e.owed?' · owes '+money(e.owed):''}`; break;
       case 'freeze': body = `🧊 Freeze declared for week of ${e.week}: ${esc(e.reason)}`; break;
-      case 'notify': body = e.auto ? `📡 Referee auto-notified (${esc(e.event)}) via ${esc(e.channel)}` : `📨 Referee sent report for week of ${e.week} via ${e.channel}`; break;
+      case 'notify': body = e.auto ? `📡 ${esc(cfg.referee.name)} alerted: ${esc(({checkin:'check-in',checkout:'check-out',week:'weekly verdict',config:'contract',freeze:'freeze',deposit:'deposit',paid:'payment',agreed:'agreement',tamper:'tamper warning',test:'test'})[e.event]||e.event)}` : `📨 Report sent to ${esc(cfg.referee.name)} for the week of ${e.week}`; break;
       case 'paid': body = `💵 Paid ${money(e.amount)}`; break;
       case 'deposit': body = `💰 Deposit of ${money(e.amount)} handed to ${esc(cfg.referee.name)}${e.note?` (${esc(e.note)})`:''}`; break;
       case 'invite': body = e.how==='link replaced' ? '🔁 Referee link replaced; the old one stopped working' : '📨 Referee invitation sent'; break;
@@ -1305,7 +1310,7 @@ $('s-test').onclick = async () => {
 };
 $('s-locate').onclick = async () => {
   $('s-locmsg').textContent = 'Getting a precise fix…';
-  try { const p = await getPosition(); setGymLocation(p.lat, p.lng, '', `Got it (±${Math.round(p.acc)} m). Make sure you are actually standing in the gym.`); }
+  try { const p = await getPosition(); setGymLocation(p.lat, p.lng, '', `Pinned to within ${Math.round(p.acc)} m. Only do this while you're inside the gym.`); }
   catch(e){ $('s-locmsg').textContent = e.message; }
 };
 function readSetupForm(){
@@ -1446,7 +1451,7 @@ async function closeSession({ minutes, verified, endDist, reason, auto=false }){
   if (!valid) reason = `only ${minutes} min, minimum is ${cfg.minMinutes}`;
   else if (!verified) {
     if (reason.includes('away from gym')) valid=false;
-    else if (unverifiedUsed) { valid=false; reason='second unverified checkout this week — only one allowed'; }
+    else if (unverifiedUsed) { valid=false; reason='second unverified check-out this week (only one allowed)'; }
     else reason = reason || 'unverified checkout';
   }
   const e = { type:'session', start:active.start, end:Date.now(), minutes, startDist:active.dist, endDist, valid, verified: valid && verified, reason: valid && verified ? '' : reason, auto };
@@ -1478,7 +1483,7 @@ function reportText(wk){
   const st = currentStatus();
   const isCurrent = wk===st.wk;
   const done = isCurrent ? st.done : w.done, result = isCurrent ? (st.warmup?'WARM-UP':st.frozen?'FROZEN':'IN PROGRESS') : w.result.toUpperCase();
-  const lines = [`Ironclad gym report for ${cfg.name}`, `Week of ${fmtDate(parseYmd(wk))}: ${result} — ${done}/${cfg.target} verified sessions.`];
+  const lines = [`Ironclad gym report for ${cfg.name}`, `Week of ${fmtDate(parseYmd(wk))}: ${result}, ${done}/${cfg.target} verified sessions.`];
   const ss = sessions().filter(s=>s.valid && weekKey(new Date(s.start))===wk);
   for (const s of ss) lines.push(`• ${fmtDate(new Date(s.start))} ${fmtTime(s.start)}, ${s.minutes} min${s.verified?'':' (unverified)'}`);
   if (!isCurrent && w.result==='fail') lines.push(`Forfeit: ${money(w.owed)}${hasDeposit() ? ' from the deposit' : ''}.${cfg.consequence?' Send it to: '+cfg.consequence+'. Keep the receipt.':''}`);
@@ -1650,7 +1655,7 @@ async function inviteReferee(){
     try {
       const r = await fetch(cfg.channel.url + '/invite', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ account: cfg.channel.account, secret: cfg.channel.secret, state: snapshot() }) });
       const j = await r.json().catch(()=>({})); if (!r.ok) throw new Error(j.error || ('server error ' + r.status)); token = j.token;
-    } catch(e){ toast("Couldn't reach your Ironclad server: " + e.message, 6000); return; }
+    } catch(e){ toast(/fetch|network|load failed/i.test(e.message) ? "Couldn't reach Ironclad alerts. Check your connection and try again." : "Couldn't make the invitation: " + e.message, 6000); return; }
   }
   const link = cfg.channel.type==='ironclad' ? `${cfg.channel.url}/r/${token}/` : refereePageUrl(token);
   const text = cfg.channel.type==='ironclad'
@@ -1726,7 +1731,7 @@ function minuteCheck(){
   const [hh,mm] = cfg.remindTime.split(':').map(Number);
   const due = now.getHours()*60+now.getMinutes() >= hh*60+mm;
   if (due && !active && !st.days.has(today) && st.remaining>0 && !st.frozen && !st.warmup && notified[today]!==1 && (cfg.planDays.includes(now.getDay()) || st.level==='bad')) {
-    new Notification('Ironclad', { body: st.level==='bad' ? `No slack left. ${st.remaining} to go — today has to be a gym day.` : `Gym day. ${st.remaining} to go this week.` });
+    new Notification('Ironclad', { body: st.level==='bad' ? `No slack left. ${st.remaining} to go, so today is a gym day.` : `Gym day. ${st.remaining} to go this week.` });
     notified[today]=1; save(LS.notified, notified);
   }
 }
@@ -1743,8 +1748,8 @@ $('btn-ics').onclick = () => {
     'BEGIN:VEVENT',`UID:${uid}@ironclad`,`DTSTAMP:${dt(new Date())}Z`,`DTSTART:${dt(start)}`,`DURATION:PT1H`,`RRULE:FREQ=WEEKLY;BYDAY=${byday}`,`SUMMARY:${summary}`,`DESCRIPTION:${desc}`,
     ...alarms.flatMap(a=>['BEGIN:VALARM','ACTION:DISPLAY',`TRIGGER:${a}`,`DESCRIPTION:${summary}`,'END:VALARM']),'END:VEVENT'].join('\r\n');
   const body = ['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//Ironclad//EN','CALSCALE:GREGORIAN',
-    ev('gym', first, `🏋️ GYM — ${cfg.target}x this week, no excuses`, `Open Ironclad and check in at ${cfg.gym.label||'the gym'}. ${money(cfg.pledge)} to ${cfg.referee.name} if you fail the week.`, cfg.planDays.map(d=>ICS[d]).join(',')||'MO,WE,FR', ['-PT2H','PT0M']),
-    ev('deadline', dl, '⏰ Gym week closes tonight — check Ironclad', `If you are short, you still have tonight. Otherwise ${money(cfg.pledge)} is owed to ${cfg.referee.name}.`, ICS[lastDay], ['PT0M']),
+    ev('gym', first, `🏋️ Gym day: ${cfg.target}x this week, no excuses`, `Open Ironclad and check in at ${cfg.gym.label||'the gym'}. ${money(cfg.pledge)} to ${cfg.referee.name} if you fail the week.`, cfg.planDays.map(d=>ICS[d]).join(',')||'MO,WE,FR', ['-PT2H','PT0M']),
+    ev('deadline', dl, '⏰ Your gym week closes tonight', `Short? You still have tonight. Otherwise ${money(cfg.pledge)} goes to ${cfg.referee.name}.`, ICS[lastDay], ['PT0M']),
     'END:VCALENDAR'].join('\r\n');
   download('ironclad-gym-reminders.ics', body, 'text/calendar');
   toast('Calendar file ready. Open it and add to your calendar.');
