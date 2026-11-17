@@ -139,6 +139,16 @@
 </div>
 <footer>Ironclad · Free, no account, no tracking · <a href="/app/privacy.html" style="color:var(--muted)">Your data, plainly</a> · <a href="/pricing/?from=landing" style="color:var(--muted)">Pricing</a> · <a href="mailto:hello@ironclad.coach" style="color:var(--muted)">hello@ironclad.coach</a></footer>
 <script>
+  // Anonymous visit count, at most once a day per browser: a "+1" on a daily total, nothing about who.
+  (function(){
+    try {
+      const day = new Date().toISOString().slice(0, 10);
+      if (localStorage.getItem('ironclad.counted.visit') === day) return;
+      localStorage.setItem('ironclad.counted.visit', day);
+      const u = (window.IRONCLAD_ALERTS_SERVER || 'https://ironclad.techb54321.workers.dev') + '/count', b = JSON.stringify({ e: 'visit' });
+      if (!(navigator.sendBeacon && navigator.sendBeacon(u, b))) fetch(u, { method: 'POST', body: b, keepalive: true, mode: 'no-cors' }).catch(function(){});
+    } catch (e) {}
+  })();
   // Platform-specific install hint
   (function(){
     const ua = navigator.userAgent, ios = /iphone|ipad|ipod/i.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1), android = /android/i.test(ua);

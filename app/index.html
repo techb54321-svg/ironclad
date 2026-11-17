@@ -628,7 +628,7 @@
     <div class="card">
       <h2>Your data</h2>
       <div class="list">
-        <div class="li"><div class="badge"><svg class="ico"><use href="#i-shield"/></svg></div><div><b>Where your data goes</b><span class="muted">It lives on this phone. No account, no ads, no tracking. Your location is never sent anywhere. With alerts on, a private copy of your activity goes to the alerts server. Questions? hello@ironclad.coach</span><a class="btn-block" href="privacy.html" style="display:block;text-align:center;text-decoration:none;margin-top:10px;padding:13px 16px;border-radius:16px;border:1px solid var(--line);background:var(--bg2);font-weight:600">Read exactly what's stored</a></div></div>
+        <div class="li"><div class="badge"><svg class="ico"><use href="#i-shield"/></svg></div><div><b>Where your data goes</b><span class="muted">It lives on this phone. No account, no ads, no tracking: Ironclad only counts anonymous totals, like how many people signed up. Your location is never sent anywhere. With alerts on, a private copy of your activity goes to the alerts server. Questions? hello@ironclad.coach</span><a class="btn-block" href="privacy.html" style="display:block;text-align:center;text-decoration:none;margin-top:10px;padding:13px 16px;border-radius:16px;border:1px solid var(--line);background:var(--bg2);font-weight:600">Read exactly what's stored</a></div></div>
         <div class="li"><div class="badge"><svg class="ico"><use href="#i-flame"/></svg></div><div><b>Ironclad Pro</b><span class="muted">Free while Ironclad is in beta. See what's coming and get first access.</span><a class="btn-block" href="/pricing/?from=app" style="display:block;text-align:center;text-decoration:none;margin-top:10px;padding:13px 16px;border-radius:16px;border:1px solid var(--line);background:var(--bg2);font-weight:600;color:var(--text)">See Pro</a></div></div>
         <div class="li" id="rotate-row"><div class="badge"><svg class="ico"><use href="#i-invite"/></svg></div><div><b>Replace the referee link</b><span class="muted">If the link got forwarded, replace it. The old one, and every phone that turned on alerts with it, stops working at once.</span><button id="btn-rotate" class="btn-block">Replace the link</button></div></div>
       </div>
@@ -1207,6 +1207,14 @@ function randomTopic(){ const a='abcdefghjkmnpqrstuvwxyz23456789'; let t='gym-';
 // The shared alerts server, e.g. 'https://ironclad.yourname.workers.dev'. Until it's set, the app offers Manual only.
 const ALERTS_SERVER_URL = 'https://ironclad.techb54321.workers.dev';
 const ALERTS_SERVER = String(window.IRONCLAD_ALERTS_SERVER || ALERTS_SERVER_URL).replace(/\/+$/, '');
+// Anonymous counts for the totals on the alerts server's status page. A "+1" and nothing else: no ID, no cookie, nothing about you.
+function countEvent(e){
+  try {
+    const u = ALERTS_SERVER + '/count', b = JSON.stringify({ e });
+    if (!(navigator.sendBeacon && navigator.sendBeacon(u, b))) fetch(u, { method:'POST', body:b, keepalive:true, mode:'no-cors' }).catch(()=>{});
+  } catch {}
+}
+function countOnce(e){ try { const k = 'ironclad.counted.' + e; if (localStorage.getItem(k)) return; localStorage.setItem(k, '1'); countEvent(e); } catch {} }
 let keptChannel = null; // the channel already in use when editing (kept unless the user switches)
 function modeAuto(){ return document.querySelector('#s-mode input:checked').value === 'auto'; }
 function updateChannelUI(){
@@ -1385,6 +1393,7 @@ async function submitSetup(){
     save(LS.cfg, cfg);
     await append({ type:'setup', name:c.name, target:c.target, pledge:c.pledge, referee:c.referee.name, gym:c.gym });
     const dep = readInitialDeposit(); if (dep>0) await append({ type:'deposit', amount:dep, note:'initial' });
+    countEvent('sign');
     toast(cfg.startWeek===weekKey(new Date()) ? 'Signed. No take-backs.' : `Signed. Warm-up until ${fmtDate(parseYmd(cfg.startWeek))}, then it counts.`, 6000);
     scheduleReminders();
     notifyReferee('signed', introText());
@@ -1840,8 +1849,10 @@ document.addEventListener('visibilitychange', async () => { if (!document.hidden
 let deferredInstall = null;
 const IS_IOS = /iphone|ipad|ipod/i.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
 function isStandalone(){ return matchMedia('(display-mode: standalone)').matches || navigator.standalone === true; }
+// A first open in the browser is a new user; a first open from the home screen is an install (iPhone has no install event).
+if (isStandalone()) countOnce('install'); else countOnce('new');
 addEventListener('beforeinstallprompt', e => { e.preventDefault(); deferredInstall = e; setTimeout(() => maybeOfferInstall(), 1200); });
-addEventListener('appinstalled', () => { deferredInstall = null; save(LS.installSeen, Date.now()); closeSheet(); toast('Installed. Ironclad is on your home screen now.', 4500); });
+addEventListener('appinstalled', () => { countOnce('install'); deferredInstall = null; save(LS.installSeen, Date.now()); closeSheet(); toast('Installed. Ironclad is on your home screen now.', 4500); });
 const SHARE_SVG = '<svg viewBox="0 0 24 24"><path d="M12 3v12M7 8l5-5 5 5M5 12v8h14v-8"/></svg>';
 const PLUS_SVG = '<svg viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="4"/><path d="M12 8v8M8 12h8"/></svg>';
 function installSheet(){
